@@ -1,4 +1,4 @@
-# [Material-UI](https://github.com/callemall/material-ui) - Example Webpack Project
+# [Material-UI](https://github.com/callemall/material-ui) -  Example Webpack Project
 
 This is an example project that uses [Material-UI](https://github.com/callemall/material-ui).
 
