@@ -1,34 +1,20 @@
-var MAX_BOTTOM_GALLERY_FRAMES_COUNT = 3;
-var frames_count = 0;
-var lastFrameId = 0;
-var curFrameId = 0;
-var pushedFrameId = 0;
-
-//define an empty image objects dictionary
-var imagesDict = [];
-//define an empty deleted frameId Array
-var deletedIdArray = [];
+var TOP_GALLERY_FRAME_DIMENSIONS = 150;
+var previousWidth;
+var previousHeight;
+var imgProportion;
+var resultImgIndex = 0;
 var client_data = {}
-//variables for storing values of each form container
-var choosenImg = '';
-var clickedCircle = '';
-var isWallOrStickerGalleryUsed = false;
-var linearProgress = 0;
+
 var newScale;
 var opacity = 1;
 
-class Frame {
-    constructor(id) {
-        this._id = id;
-        this._wall = '';
-        this._mask = '';
-        this._sticker = '';
-        this._result = '';
-        this._completed = false;
-    }
-}
-var image, mask, sticker;
+var resultImage = ''
+var resultImageExt;
 
+var clickedGalleryImageSrc = ''
+var clickedGalleryImageName = ''
+
+var image, mask, sticker;
 var canvasOffset = $("#layer2").offset();
 var offsetX = canvasOffset.left;
 var offsetY = canvasOffset.top;
@@ -46,15 +32,19 @@ var draggingResizer = {
     y: 0
 };
 
-var imageX;// = 50;
-var imageY;// = 50;
+var imageX;
+var imageY;
 var imageWidth, imageHeight, imageRight, imageBottom;
 var draggingImage = false;
 var imageClick;
 
-var WIDTH = 400;
+var BORDER_WIDTH;
+var BORDER_HEIGHT;
+var WIDTH;
 var HEIGHT = 300;
-var canvProportion = WIDTH / HEIGHT;
+var borderProportion;
+var canvasProportion;
+var stickerProportion;
 var scale = 1;
 
 var isDrawStarted;
@@ -74,282 +64,230 @@ sticker = new Image();
 
 //**************utils********************
 function sijax_data(key, value) {
+    Sijax.setRequestUri('http://93.77.34.47:63100/');
     client_data[key] = value;
     Sijax.request('client_data', [client_data]);
     delete client_data[key];
 }
 
-function toDataURL() {
-    var file = document.querySelector('input[type=file]').files[0];
-    var reader = new FileReader();
-    return reader.readAsDataURL(file);
-}
-
-/////////////////// ON PUSH PUTTON PRESSED //////////////////
-function clearCanvas() {
-    canvasContext.clearRect(0, 0, WIDTH, HEIGHT);
-    backContext.clearRect(0, 0, WIDTH, HEIGHT);
-}
-
-function clearLargeImg() {
-    //canvas data URL
-    image.src = "";
-    mask.src = "";
-    sticker.src = "";
-    clearCanvas();
-    // clear large img, created with auto mode
-    if ($('#theImg') != undefined) {
-        $('#theImg').remove();
+window.onresize = function () {
+    BORDER_WIDTH = get_border_props()['borderWidth'];
+    BORDER_HEIGHT = get_border_props()['borderHeight'];
+    borderProportion = get_border_props()['borderProportion'];
+    setImageProperties();
+    previousWidth = BORDER_WIDTH
+    previousHeight = BORDER_HEIGHT
+    draw(true, false)
+    if (sticker.src.includes('data')) {
+        onStickerLoading()
     }
+    set_automode_result_img_style()
 }
 
-function showResultImg(isResultFromCanvas) {
-    draw(false, false);
-    if (isResultFromCanvas == true) {
-        imgURL = canvas.toDataURL();
-    }
-    else {
-        imgURL = $('#theImg').attr('src');
-
-    }
-    if (isWallOrStickerGalleryUsed == true) {
-        pushedFrameId = lastFrameId;
-    }
-    document.getElementById('img' + pushedFrameId).setAttribute("src", imgURL);
-    imagesDict[pushedFrameId]._result = imgURL;
-    imagesDict[pushedFrameId]._completed = true;
-    renderFrameComponents();
-    pushedFrameId = 0;
-}
-//set Frame items values(used by pushToGallery function)
-function setFrameItems() {
-    imagesDict[curFrameId]._wall = image.src
-    imagesDict[curFrameId]._mask = mask.src
-    imagesDict[curFrameId]._sticker = sticker.src
+function set_automode_result_img_style() {
+    automodeResultImage = document.getElementById('theImg')
+    automodeResultImage.style.width = (canvasContext.canvas.width).toString().concat('px')
+    automodeResultImage.style.height = (canvasContext.canvas.height).toString().concat('px')
+    automodeResultImage.style.top = canvasContext.canvas.style.top
+    automodeResultImage.style.left = canvasContext.canvas.style.left
 }
 
-function pushToGallery() {
-    // button 'Push' has disabled state, when where is no image in canvas 
-    setBttnPushDisabled()
-    setBttnDownloadEnabled()
-    setBttnApplyEnabled()
+function get_border_props() {
+    borderWidth = get_element_dim('canvasesdiv')['elementWidth']
+    borderHeight = get_element_dim('canvasesdiv')['elementHeight']
+    borderProportion = get_element_dim('canvasesdiv')['elementProportion']
+    return { borderWidth, borderHeight, borderProportion }
+}
 
-    if (isWallOrStickerGalleryUsed == false) {
-        if (imagesDict[curFrameId] != undefined) {
-            if ($('#theImg').attr('src') == undefined) {
-                if (imagesDict[curFrameId]._result == "") {
-                    showResultImg(true)
-                    clearLargeImg();
-                }
-                else {
-                    alert("There is not an image in a big frame!")
-                }
-            }
-            else {
-                if (imagesDict[curFrameId]._result == "") {
-                    showResultImg(false)
-                    clearLargeImg();
-                }
-                else {
-                    alert("There is not an image in a big frame!")
-                }
-            }
-        }
+function get_element_dim(element_id) {
+    var element = document.getElementById(element_id);
+    elementWidth = element.clientWidth;
+    elementHeight = element.clientHeight;
+    elementProportion = elementWidth / elementHeight;
+    return { elementWidth, elementHeight, elementProportion }
+}
 
+function setImageProperties() {
+    if (canvasProportion <= borderProportion) {
+        set_canvas_dimensions(BORDER_HEIGHT * canvasProportion, BORDER_HEIGHT)
+        set_canvas_position(0, ((BORDER_WIDTH - canvasContext.canvas.width) / 2).toString().concat('px'))
     }
     else {
-        FramePaper();
-        if (imagesDict[curFrameId] != undefined) {
-            if ($('#theImg').attr('src') != undefined) {
-                showResultImg(false)
-                setFrameItems()
-                clearLargeImg();
-                isWallOrStickerGalleryUsed = false;
-            }
-            else {
-                showResultImg(true)
-                setFrameItems()
-                clearLargeImg();
-                isWallOrStickerGalleryUsed = false;
-            }
-        }
+        set_canvas_dimensions(BORDER_WIDTH, BORDER_WIDTH / canvasProportion)
+        set_canvas_position(((BORDER_HEIGHT - canvasContext.canvas.height) / 2).toString().concat('px'), 0)
     }
-    sijax_data('edited_and_pushed', 'true')
-    // set default state to manually and auto mode controllers
-    setDefaultAutoMode();
-    setDefaultManuallyMode();
-}
-
-/////////////// ON "+" BUTTON PRESSED (add bottom gallery frame) ////////////
-var index = 0;
-// adds image to bottom gallery after button "+" pressed
-function addFrame(delta) {
-    if (frames_count <= MAX_BOTTOM_GALLERY_FRAMES_COUNT) {
-
-        frames_count++;
-        if (deletedIdArray.length == 0) {
-            lastFrameId = frames_count;
-        }
-        else {
-            lastFrameId = deletedIdArray[index];
-            deletedIdArray.splice(index, 1);
-        }
-        lastFrameId = lastFrameId.toString();
-        curFrameId = lastFrameId;
-        //creating new frame
-        $('<form>').attr({ id: lastFrameId, style: 'z-index: 1;float:left; position:relative; margin:15px; left:50px; top:15px;  border: 1px solid rgb(204, 204, 204); height:150px; width:150px' })
-            .append($('<div>').attr({ id: 'paper'.concat(lastFrameId), style: 'position:absolute;left:-30px;top:-30px;' }))
-            .append($('<div>').attr({ style: 'position:absolute; left:-1px; top:-1px; border: 1px solid rgb(204, 204, 204);pointer-events: auto; height:150px;width:150px' }))// rect arount image
-            .append($('<span>').attr({ id: 'load_del'.concat(lastFrameId), name: 'deleteFrameBttn', style: 'z-index: 3;position: relative; float:right; right:0px; bottom:0px' }))
-            .append($('<div>').attr({ id: 'radioBttns'.concat(lastFrameId), style: 'z-index: 3;position: absolute; float:right; right:10px; bottom:7px' }))
-            .append($('<img>').attr({ id: 'img'.concat(lastFrameId), style: 'position:absolute;left:0px;top:0px; height:150px; width:150px' }))
-            .appendTo('#imgsHolder');
-        //create new Frame object(container of wall, mask and sticker itemg)
-        imagesDict[lastFrameId] = new Frame(lastFrameId);
-        sijax_data('lastFrameId', lastFrameId)
-        if (frames_count == MAX_BOTTOM_GALLERY_FRAMES_COUNT) {
-            // The limit of frames is exhausted!
-            setBttnPlusDisabled();
-        }
+    WIDTH = canvasContext.canvas.width
+    HEIGHT = canvasContext.canvas.height
+    if (sticker.src.includes('data')) {
+        onStickerLoading()
     }
 }
+
+function set_canvas_dimensions(canvasWidth, canvasHeight) {
+    canvasContext.canvas.width = canvasWidth;
+    canvasContext.canvas.height = canvasHeight;
+}
+
+function set_canvas_position(canvasTop, canvasLeft) {
+    canvasContext.canvas.style.top = canvasTop;
+    canvasContext.canvas.style.left = canvasLeft;
+}
+
 ///////////////////////// HANDLE CLICK EVENTS ////////////////////
 //********************** handle image click event ***************
 $('body').on('click', 'img', function () {
-    var imgId = this.id;
-    curFrameId = $(this).parent().attr('id');
-    //on bottom gallery image click
-    if (curFrameId != undefined && curFrameId != "formCanvasResponse") {// prevent large image click event
-        if (!image.src.includes("data")) {
-            if (curFrameId in imagesDict) {
-                if ((imagesDict[curFrameId]._id == curFrameId) && (imagesDict[curFrameId]._completed == false)) {
-                    if ((imagesDict[curFrameId]._wall != '') && (imagesDict[curFrameId]._mask != '') && (imagesDict[curFrameId]._sticker != '')) {
-                        image.src = imagesDict[curFrameId]._wall;
-                        mask.src = imagesDict[curFrameId]._mask;
-                        sticker.src = imagesDict[curFrameId]._sticker;
-                        imagesDict[curFrameId]._completed = true;
-                        pushedFrameId = curFrameId;
-                        setFrameItems();
-                        sijax_data('_completed', '_completed');
-                    } else {
-                        alert('Please,input three images: Wall, Mask and Sticker!');
-                    }
-                }
-            }
-        } else {
-            alert('Please, clear large image!')
-        }
+    if ($(this).parent().parent().parent().parent().attr('id') == 'wall_gallery' && $(this).parent().attr('id') != 'formCanvasResponse') {
+        clear_automode_img()
+        sijax_data('wall_mask', [this.getAttribute("name"), this.getAttribute("name").replace('wall', 'mask')]);
+        set_wall_or_mask_proportions(image)
+        // show caption on wall/mask button click
+        $(".caption").css("display","inline-block");
     }
-    //on top Wall or Sticker galleries image click
-    else {
-        if (frames_count < MAX_BOTTOM_GALLERY_FRAMES_COUNT) { //add new bottom gallery frame
-            isWallOrStickerGalleryUsed = true;
-            if ($(this).parent().parent().parent().parent().attr('id') == 'wall_gallery') {
-                // random value not 0
-                pushedFrameId = 5;
-                image.src = this.getAttribute("src");
-                //send image data to server.It will be used for mask creating
-                sijax_data('wall_mask', this.getAttribute("name"));
-                draw(false, false);
-            }
-            else {
-                sticker.src = this.getAttribute("src")
-                sijax_data('sticker', this.getAttribute("name"));
-            }
-        }
-        if (frames_count == MAX_BOTTOM_GALLERY_FRAMES_COUNT) {
+    else if($(this).parent().attr('id') != 'formCanvasResponse') {
+        clear_automode_img()
+        sijax_data('sticker', this.getAttribute("name"));
+        onStickerLoading()
+    }
+    set_button_download_state()
+}
+);
 
-            alert("The limit of frames is exhausted!")
-        }
+sticker.onload = function () {
+    onStickerLoading()
+    set_button_download_state()
+}
+
+function set_button_download_state() {
+    if (image.src.includes('data') && sticker.src.includes('data')) {
+        setBttnDownloadEnabled()
+    } else {
+        setBttnDownloadDisabled()
     }
-});
-//********************** handle frame del button click event ***************
-$('body').on('click', 'button', function () {
-    if (this.name == 'delete') {//check crame delete buttons press
-        if (this.parentNode.parentNode.parentNode.parentNode.parentNode.id == 'imgsHolder') {
-            curFrameId = this.parentNode.parentNode.parentNode.parentNode.id;
+}
+
+function set_wall_or_mask_proportions(image) {
+    image.onload = function () {
+        imgProportion = image.width / image.height;
+        canvasProportion = imgProportion
+        setImageProperties()
+
+        if (imgProportion <= borderProportion) {
+            HEIGHT = previousHeight
+            if (previousWidth == WIDTH) {
+                WIDTH = WIDTH * imgProportion / borderProportion;
+            }
+            set_canvas_dimensions(WIDTH, HEIGHT)
+            set_canvas_position(0, ((previousWidth - WIDTH) / 2).toString().concat('px'))
+            draw(false, false);
         }
         else {
-            curFrameId = this.parentNode.parentNode.parentNode.id
+            WIDTH = previousWidth;
+            if (previousHeight == HEIGHT) {
+                HEIGHT = HEIGHT * borderProportion / imgProportion;
+            }
+            set_canvas_dimensions(WIDTH, HEIGHT)
+            set_canvas_position(((previousHeight - HEIGHT) / 2).toString().concat('px'), 0)
+            draw(false, false);
         }
+        canvasProportion = canvasContext.canvas.width / canvasContext.canvas.height
+        if (sticker.src.includes('data')) {
+            onStickerLoading()
+        }
+        set_button_download_state()
+    };
+}
+
+function onStickerLoading() {
+    if (!image.src.includes('data')) {
+        WIDTH = BORDER_WIDTH
+        HEIGHT = BORDER_HEIGHT
+        imgProportion = borderProportion;
+        set_canvas_dimensions(WIDTH, HEIGHT)
+        set_canvas_position(0, 0)
     }
-})
-
-
-//********************** handle button click event ***************
-// populate Frame object with image items(Wall, Mask, Sticker)
-function populateFrame() {
-    if (imagesDict[curFrameId]._completed == false) {
-
-        switch (clickedCircle) {
-            case 'Wall':
-                imagesDict[curFrameId]._wall = choosenImg;
-                break;
-            case 'Mask':
-                imagesDict[curFrameId]._mask = choosenImg;
-                break;
-            case 'Sticker':
-                imagesDict[curFrameId]._sticker = choosenImg;
-                break;
-        }
-        clickedCircle = '';
-        choosenImg = '';
+    stickerProportion = sticker.width / sticker.height;
+    if (sticker.width == 0 || sticker.height == 0) {
+        var i = new Image();
+        i.onload = function () {
+            stickerProportion = i.width / i.height;
+            set_sticker_dim_and_pos()
+        };
+        i.src = sticker.src;
+    } else {
+        set_sticker_dim_and_pos()
     }
 }
 
-function deleteFrame() {
-    //remove section with frame
-    document.getElementById(curFrameId).remove();
-    frames_count--;
-    //remove Frame object from imagesDict dictionary
-    delete imagesDict[curFrameId];
-    // push deleted curFrameId into deletedIdArray
-    deletedIdArray.push(curFrameId)
-    sijax_data('deletedImgId', curFrameId)
-    // enable button "Plus" wten the limit of frames became not exhausted
-    setBttnPlusEnabled();
-    var completedFramesCount = resCount();
-    if (completedFramesCount == 0) {
-        setBttnDownloadDisabled();
-        setBttnApplyDisabled();
+function set_sticker_dim_and_pos() {
+    if (stickerProportion <= imgProportion) {
+        imageWidth = HEIGHT * stickerProportion;
+        imageHeight = HEIGHT;
+        imageY = 0;
+        imageX = (WIDTH - imageWidth) / 2;
     }
     else {
-        setBttnDownloadEnabled()
-        setBttnApplyEnabled()
+        imageWidth = WIDTH;
+        imageHeight = WIDTH / stickerProportion;
+        imageY = (HEIGHT - imageHeight) / 2;
+        imageX = 0;
     }
-}
+    imageRight = imageX + imageWidth;
+    imageBottom = imageY + imageHeight;
 
-//this method runs when Frame items are already completed
-function onRadiusBttnPressed() {
-    imageSRC = document.getElementById('img'.concat(curFrameId));
-    switch (clickedCircle) {
-        case 'Wall':
-            imageSRC.setAttribute("src", imagesDict[curFrameId]._wall);
-            break;
-        case 'Mask':
-            imageSRC.setAttribute("src", imagesDict[curFrameId]._mask);
-            break;
-        case 'Sticker':
-            imageSRC.setAttribute("src", imagesDict[curFrameId]._sticker);
-            break;
-        case 'Result':
-            imageSRC.setAttribute("src", imagesDict[curFrameId]._result);
-            break;
-    }
-}
+    draw(true, false);
+    isDrawStarted = true;
+    newScale = imageWidth / sticker.width * 100;
 
+    setDefaultManuallyMode();
+
+}
 //*********** handle DOM Node inserted event ***************
-function onChangeHandler(event) {
-    if (event.target.localName == 'img') {
-        choosenImg = event.target.src;
-        populateFrame();
-        renderDelFrameBttn(curFrameId)
+//check auto mode edit image loads event to save proportions
+
+document.getElementById('formCanvasResponse')
+    .addEventListener('DOMNodeInserted', onAutoImgChangeHandler);
+
+function onAutoImgChangeHandler(event) {
+    event.target.width = WIDTH;
+    event.target.height = HEIGHT;
+    event.target.style.top = canvasContext.canvas.style.top;
+    event.target.style.left = canvasContext.canvas.style.left;
+};
+
+//check wall,mask or sticker loads to top gallery event to save img proportions
+document.getElementById("wall_gallery")
+    .addEventListener('DOMNodeInserted', onTopGalleryChangeHandler);
+document.getElementById("sticker_gallery")
+    .addEventListener('DOMNodeInserted', onTopGalleryChangeHandler);
+
+function onTopGalleryChangeHandler(event) {
+    try {
+        var galleryImg = event.target.children[0].children[0].children[0];
+        if (galleryImg.localName == 'img') {
+            var i = new Image();
+            i.onload = function () {
+                var imgProportion = i.width / i.height;
+                if (imgProportion <= 1) {
+                    galleryImg.style.width = (TOP_GALLERY_FRAME_DIMENSIONS * imgProportion).toString().concat('px');
+                    galleryImg.style.height = (TOP_GALLERY_FRAME_DIMENSIONS).toString().concat('px');
+
+                    galleryImg.style.paddingLeft = ((TOP_GALLERY_FRAME_DIMENSIONS - galleryImg.width) / 2).toString().concat('px');
+                    galleryImg.style.paddingRight = ((TOP_GALLERY_FRAME_DIMENSIONS - galleryImg.width) / 2).toString().concat('px');
+                }
+                else {
+                    galleryImg.style.width = (TOP_GALLERY_FRAME_DIMENSIONS).toString().concat('px');
+                    galleryImg.style.height = (TOP_GALLERY_FRAME_DIMENSIONS / imgProportion).toString().concat('px');
+
+                    galleryImg.style.paddingTop = ((TOP_GALLERY_FRAME_DIMENSIONS - galleryImg.height) / 2).toString().concat('px');
+                    galleryImg.style.paddingBottom = ((TOP_GALLERY_FRAME_DIMENSIONS - galleryImg.height) / 2).toString().concat('px');
+                }
+            };
+            i.src = galleryImg.src;
+        }
+    } catch (e) {
+        console.log(e.message)
     }
 };
-//check wall,mask or sticker loads event
-document.getElementById("imgsHolder")
-    .addEventListener('DOMNodeInserted', onChangeHandler);
-
 //******************draw canvas images********************
 function drawDragAnchor(x, y) {
     canvasContext.beginPath();
@@ -369,7 +307,7 @@ function draw(withAnchors, withBorders) {
 
     // optionally draw the draggable anchors
 
-    if (sticker.src !== '' && withAnchors) {
+    if (sticker.src.includes('data') && withAnchors) {
         //drawDragAnchor(20, 20);
         drawDragAnchor(imageX, imageY);
         drawDragAnchor(imageRight, imageY);
@@ -378,7 +316,7 @@ function draw(withAnchors, withBorders) {
     }
 
     // optionally draw the connecting anchor lines
-    if (sticker.src !== '' && withBorders) {
+    if (sticker.src.includes('data') && withBorders) {
         canvasContext.beginPath();
         canvasContext.moveTo(imageX, imageY);
         canvasContext.lineTo(imageRight, imageY);
@@ -397,34 +335,6 @@ function draw(withAnchors, withBorders) {
     backContext.globalCompositeOperation = "destination-atop";
     backContext.drawImage(image, 0, 0, WIDTH, HEIGHT);
     backContext.globalCompositeOperation = dest2;
-
-
-}
-
-sticker.onload = function () {
-    // enable button push
-    setBttnPushEnabled();
-    var stickerProportion = sticker.width / sticker.height;
-    if (stickerProportion <= canvProportion) {
-        imageWidth = HEIGHT * stickerProportion;
-        imageHeight = HEIGHT;
-        imageY = 0;
-        imageX = (WIDTH - imageWidth) / 2;
-    }
-    else {
-        imageWidth = WIDTH;
-        imageHeight = WIDTH / stickerProportion;
-        imageY = (HEIGHT - imageHeight) / 2;
-        imageX = 0;
-    }
-    imageRight = imageX + imageWidth;
-    imageBottom = imageY + imageHeight;
-
-    draw(true, false);
-
-    isDrawStarted = true;
-    newScale = imageWidth / sticker.width * 100;
-    setDefaultManuallyMode();
 }
 
 draw(true, false);
@@ -445,79 +355,207 @@ function addWall() {
     document.getElementById('wallFile').click();
 
 }
+
+function addMask() {
+    document.getElementById('maskFile').click();
+}
+
 function addSticker() {
     document.getElementById('stickerFile').click()
 
 }
 
-// delete top gallery image on right click
-$(function () {
-    $('ul').on('click', 'button', function (e) { //Get li under ul and invoke on contextmenu
-        e.preventDefault(); //Prevent defaults
-        //confirm window
-        if (window.confirm("Do you really want to delete an image?")) {
-            imgName = $(this).parent().parent().parent().parent().find('img').attr('name');
-            sijax_data('delGalleryImg', imgName)
-            $(this).parent().parent().parent().parent().remove();
-        }
-    });
-});
-
-///////////// auto mode settings ////////////////
-// auto mode form onChange
-function stickerCenterState(sticker_center) {
-    sijax_data('sticker_center', sticker_center)
-    sticker_center = false;
-}
-function repeat_xState(repeat_x) {
-    sijax_data('repeat_x', repeat_x)
-    sijax_data('repeat_y', 1)
-    repeat_x = 1;
-}
-function repeat_yState(repeat_y) {
-    sijax_data('repeat_y', repeat_y)
-    sijax_data('repeat_x', 1)
-    repeat_y = 1;
-}
-function opacityState(opacity) {
-    sijax_data('opacity', opacity)
-    opacity = 1;
-}
-
-
 //////////// form submit settings ///////////////
-function loadWallFile() {
+function loadGalleryWallFile() {  
     var file = document.getElementById('wallFile').files[0];
     var reader = new FileReader();
     reader.readAsDataURL(file);
     reader.addEventListener("load", function () {
-        sijax_data('wallFile', reader.result)
+        sijax_data('galleryWallFile', reader.result)
     }, false);
-
-
 }
-function loadStickerFile() {
+
+function loadGalleryMaskFile() {
+    var file = document.getElementById('maskFile').files[0];
+    var reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.addEventListener("load", function () {
+        mask_name = createMaskName();
+        sijax_data('galleryMaskFile', [mask_name, reader.result])
+    }, false);
+}
+
+function createMaskName() {
+    return clickedGalleryImageName.replace('wall', 'mask')
+}
+
+function loadGalleryStickerFile() {
     var file = document.getElementById('stickerFile').files[0];
     var reader = new FileReader();
     reader.readAsDataURL(file);
     reader.addEventListener("load", function () {
-        sijax_data('stickerFile', reader.result)
+        sijax_data('galleryStickerFile', reader.result)
     }, false);
 
 }
 
-function loadFrameImg() {
-    var file = document.getElementById('selectedFile').files[0];
-    var reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.addEventListener("load", function () {
-        sijax_data(clickedCircle, reader.result)
-    }, false);
+// top gallery image component click
+$(function () {
+    $('ul').on('click', 'button', function (e) { //Get li under ul and invoke on contextmenu
+        e.preventDefault(); //Prevent defaults
 
+        var clicked_bttn_id = $(this).attr('id')
+        var currentImageIndex;
+        if ($(this).parent().parent().parent().attr('id') != undefined) {// wall gallery
+            currentImageIndex = $(this).parent().parent().parent().attr('id').split('del_wall')[1]
+            clickedGalleryImageName = $('#_wall'.concat(currentImageIndex)).attr('name')
+        } else {
+            currentImageIndex = $(this).parent().parent().attr('id').split('del_sticker')[1]
+            clickedGalleryImageName = $('#_sticker'.concat(currentImageIndex)).attr('name')
+        }
+
+        switch (clicked_bttn_id) {
+
+            case 'delete':
+                onFrameDeleteBttnClick(this, clickedGalleryImageName)
+                break;
+            case 'change_wall_mask':
+                // hide caption on wall/mask button click
+                $(".caption").css("display","none");
+                onChangeWallMaskBttnClick(this, currentImageIndex)
+                break;
+            /*case 'show_mask':
+               onShowMaskBttnClick(this, currentImageIndex)
+               break;*/
+        }
+    });
+});
+
+function onFrameDeleteBttnClick(_this, selectedImageMame) {
+    if (window.confirm("Do you really want to delete an image?")) {
+        imgName = $(_this).parent().parent().parent().parent().find('name');
+        sijax_data('delGalleryImg', selectedImageMame)
+        $(_this).parent().parent().parent().parent().remove();
+    }
 }
 
+function onChangeWallMaskBttnClick(_this, currentImageIndex) {
+    clickedGalleryImageSrc = $('#_wall'.concat(currentImageIndex)).attr('src')
+    $('#_wall'.concat(currentImageIndex)).attr('src', $(_this).parent().parent().parent().attr('src'))
+    $(_this).parent().parent().parent().attr('src', clickedGalleryImageSrc)
+}
+/*
+function onShowMaskBttnClick(_this, currentImageIndex){
+    clickedGalleryImageSrc = $(_this).parent().parent().parent().attr('src')
+    $(_this).parent().parent().parent().attr('src',  $('#_img'.concat(currentImageIndex)).attr('src'))
+    $('#_img'.concat(currentImageIndex)).attr('src', clickedGalleryImageSrc)
+    
+}*/
+
+///////////// auto mode settings ////////////////
+// auto mode form onChange
+function stickerCenterState(sticker_center) {
+    if (check_image_items_cmpleted()) {
+        sijax_data('sticker_center', sticker_center)
+        sticker_center = false;
+    }
+}
+
+function repeat_xState(repeat_x) {
+    if (check_image_items_cmpleted()) {
+        sijax_data('repeat_x', repeat_x)
+        sijax_data('repeat_y', 1)
+        repeat_x = 1;
+    }
+}
+
+function repeat_yState(repeat_y) {
+    if (check_image_items_cmpleted()) {
+        sijax_data('repeat_y', repeat_y)
+        sijax_data('repeat_x', 1)
+        repeat_y = 1;
+    }
+}
+
+function opacityState(opacity) {
+    if (check_image_items_cmpleted()) {
+        sijax_data('opacity', opacity)
+        opacity = 1;
+    }
+}
+
+function check_image_items_cmpleted() {
+    if (image.src.includes('data') && sticker.src.includes('data')) {
+        return true;
+    }
+    alert('You must load at least Wall and sticker')
+    return false;
+}
+
+//********************** handle Wall, Mask or Sticker button click event ***************
+function readURL(input, type) { 
+    clear_automode_img()
+
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+
+        reader.onload = function (e) {
+            var result = e.target.result;
+            switch (type) {
+                case "image":
+                    image.src = result;
+                    sijax_data('Wall', [input.files[0]['name'],result])
+                    $("#imageInput")[0].value = '';
+                    break;
+                case "mask":
+                    mask.src = result;
+                    sijax_data('Mask', [input.files[0]['name'],result])
+                    $("maskInput")[0].value = '';
+                    break;
+                case "sticker":
+                    sticker.src = result;
+                    sijax_data('Sticker', [input.files[0]['name'],result])
+                    $("#stickerInput")[0].value = '';
+                    break;
+            }
+
+            set_wall_or_mask_proportions(image)
+            if (sticker.src.includes('data')) {
+                onStickerLoading()
+            }
+
+           set_button_download_state();
+        }
+
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+$("#imageInput").change(function () {
+    readURL(this, "image");
+    });
+
+$("#maskInput").change(function () {
+    readURL(this, "mask");
+});
+
+$("#stickerInput").change(function () {
+    readURL(this, "sticker");
+});
 
 /////////////////// DRUG & SCALE ///////////////////////
+// mouse move coords relative to canvas
+$(canvas).mousemove(function (jqEvent) {
+    var coords = {
+        x: jqEvent.pageX - $(canvas).offset().left,
+        y: jqEvent.pageY - $(canvas).offset().top
+    };
+    mouseX = coords.x
+    mouseY = coords.y
+});
+
+///////////////////////////////////////////////////////////////////////////
+
 function drawDragAnchor(x, y) {
     canvasContext.beginPath();
     canvasContext.arc(x, y, resizerRadius, 0, pi2, false);
@@ -526,9 +564,7 @@ function drawDragAnchor(x, y) {
 }
 
 function anchorHitTest(x, y) {
-
     var dx, dy;
-
     // top-left
     dx = x - imageX;
     dy = y - imageY;
@@ -554,7 +590,6 @@ function anchorHitTest(x, y) {
         return (3);
     }
     return (-1);
-
 }
 
 function hitImage(x, y) {
@@ -563,12 +598,15 @@ function hitImage(x, y) {
 }
 
 function handleMouseDown(e) {
-    if (pushedFrameId != 0) {//canvas is clear
-        startX = parseInt(e.clientX - offsetX);
-        startY = parseInt(e.clientY - offsetY);
-        draggingResizer = anchorHitTest(startX, startY);
-        draggingImage = draggingResizer < 0 && hitImage(startX, startY);
-    }
+    var coords = {
+        x: e.pageX - $(canvas).offset().left,
+        y: e.pageY - $(canvas).offset().top
+    };
+    startX = coords.x
+    startY = coords.y
+
+    draggingResizer = anchorHitTest(startX, startY);
+    draggingImage = draggingResizer < 0 && hitImage(startX, startY);
 }
 
 function handleMouseUp(e) {
@@ -584,13 +622,8 @@ function handleMouseOut(e) {
 }
 
 function handleMouseMove(e) {
-
     if (draggingResizer > -1) {
 
-        mouseX = parseInt(e.clientX - offsetX);
-        mouseY = parseInt(e.clientY - offsetY);
-
-        // resize the image
         switch (draggingResizer) {
             case 0:
                 //top-left
@@ -631,10 +664,6 @@ function handleMouseMove(e) {
     } else if (draggingImage) {
 
         imageClick = false;
-
-        mouseX = parseInt(e.clientX - offsetX);
-        mouseY = parseInt(e.clientY - offsetY);
-
         // move the image by the amount of the latest drag
         var dx = mouseX - startX;
         var dy = mouseY - startY;
@@ -645,10 +674,8 @@ function handleMouseMove(e) {
         // reset the startXY for next time
         startX = mouseX;
         startY = mouseY;
-
         // redraw the image with border
         draw(false, true);
-
     }
 }
 
@@ -656,7 +683,8 @@ $("#layer2").mousedown(function (e) {
     handleMouseDown(e);
 });
 $("#layer2").mousemove(function (e) {
-    handleMouseMove(e);
+    if (sticker.src.includes('data'))
+        handleMouseMove(e);
 });
 $("#layer2").mouseup(function (e) {
     handleMouseUp(e);
@@ -672,11 +700,32 @@ function set_toggle_state(manuallyMode, autoMode, toggle_state) {
         document.getElementById(autoMode).hidden = false;
     }
     else {
+
         document.getElementById(autoMode).hidden = true;
         document.getElementById(manuallyMode).hidden = false;
     }
+    automodeImgDivVisibility()
 }
+
+function automodeImgDivVisibility() {
+    var automodeImgDiv = document.getElementById("formCanvasResponse");
+    if (automodeImgDiv.style.display === "none") {
+        automodeImgDiv.style.display = "block";
+    } else {
+        automodeImgDiv.style.display = "none";
+    }
+}
+
 window.onload = function () {// default settings mode
+    BORDER_WIDTH = get_border_props()['borderWidth'];
+    BORDER_HEIGHT = get_border_props()['borderHeight'];
+    borderProportion = get_border_props()['borderProportion'];
+
+    WIDTH = BORDER_WIDTH
+    HEIGHT = BORDER_HEIGHT
+    previousWidth = WIDTH
+    previousHeight = HEIGHT
+
     set_toggle_state("manuallyMode", "autoModeReact", 'unchecked');
 }
 
@@ -703,47 +752,55 @@ function fireEvent(obj, evt) {
     }
 }
 
-// result images count in imagesDict(uses in linear progress bar)
-function resCount() {
-    count = 0;
-    for (var key in imagesDict) {
-        if (imagesDict[key]._result != "") {
-            count++;
-        }
-    }
-    return count;
-}
 function onDownload() {
-    var downloaded = 0;
-    maxCount = resCount();
-    for (var key in imagesDict) {
-        console.log('jjjjj')
-        if (imagesDict[key]._result != "") {
-            title = 'result-'.concat(key);
-            download(imagesDict[key]._result, title)
-            downloaded++;
-            linearProgress = (downloaded / maxCount) * 100;
-            setPercent(linearProgress);
-        }
-    }
-    setTimeout(setPercent, 1000, 0);
+    resultImgIndex = resultImgIndex += 1
+    set_automode_img_attrs()
+    if (resultImage != "") {
+        title = 'result-'.concat(resultImgIndex).concat(resultImageExt);
+        download(resultImage, title)
+        setPercent(100);
+    } resultImage = ''
+    set_default_values();
+    clearLargeImg();
+
+    setTimeout(setPercent, 800, 0);
+    setBttnDownloadDisabled()
 }
 
-
-//******************apply images********************
-function onApply() {
-    var applyed = 0;
-    maxCount = resCount();
-    for (var key in imagesDict) {
-        if (imagesDict[key]._result != "") {
-            applyed++;
-            linearProgress = (applyed / maxCount) * 100;
-            setPercent(linearProgress);
-        }
+function set_automode_img_attrs() {
+    var img_src = $('#theImg').attr('src')
+    resultImage = canvas.toDataURL();
+    if (img_src != undefined) {
+        resultImage = img_src;
+        resultImageExt = '.jpg'
+    } else {
+        resultImageExt = '.png'
     }
-    setTimeout(setPercent, 1000, 0);
-    sijax_data('imagesDict', imagesDict)
 }
-// scale progress bar
-$('#linearProgress').css({ transform: 'scale(1.495)' });
+
+function set_default_values() {
+    sijax_data('downloaded', 'true');
+    setDefaultAutoMode();
+    setDefaultManuallyMode();
+}
+
+function clearLargeImg() {
+    //canvas data URL
+    image.src = '';
+    mask.src = '';
+    sticker.src = '';
+    clearCanvas();
+   clear_automode_img()
+}
+
+function clear_automode_img(){
+    if ($('#theImg') != undefined) {
+        $('#theImg').remove();
+    }
+}
+
+function clearCanvas() {
+    canvasContext.clearRect(0, 0, WIDTH, HEIGHT);
+    backContext.clearRect(0, 0, WIDTH, HEIGHT);
+}
 

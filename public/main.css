@@ -62,10 +62,10 @@
 	
 	/* tabs */
 	#raz { /* корпус */ 
-	  top: 3px;
+	  top: -70px;
 	  position: relative;
-	  height: 275px;
-	  width: 405px;
+	  height: 320px;
+	  /*width: 405px;*/
 	  border-top: 30px solid #fcfbfb;
     	  
 	}
@@ -139,8 +139,8 @@
 		position: absolute;
 		top: 0;
 		left: 0;   
-		height: 78%;
-		width: 78%;
+		height: 150px;
+		width: 85%;
 		padding: 0 10px;
 		box-sizing: border-box;
 		pointer-events: none;

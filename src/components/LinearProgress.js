@@ -1,6 +1,10 @@
 import React, { Component } from 'react';
 import LinearProgress from 'material-ui/LinearProgress';
 
+const style = {
+  marginTop: -280,
+};
+
 // thid method is called from main.js 
 window.setPercent = function setPercent(percent) {
   LinearProgressExampleDeterminate.progress(percent);
@@ -22,7 +26,7 @@ export default class LinearProgressExampleDeterminate extends Component {
 
   render() {
     return (
-      <LinearProgress mode="determinate" value={this.state.completed} />
+      <LinearProgress mode="determinate" style={style} value={this.state.completed} />
     );
   }
 }

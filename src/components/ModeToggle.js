@@ -6,7 +6,7 @@ const styles = {
     maxWidth: 250,
   },
   toggle: {
-    marginBottom: 16,
+    // marginBottom: 16,
   },
 };
 var counter = 0;
@@ -15,24 +15,24 @@ export default class ToggleExampleSimple extends Component {
     super(props)
     this.onToggleClick = this.onToggleClick.bind(this);
   }
- 
-onToggleClick(event) {
-  counter ++;
-  if(counter%2 == 1){
-    window.set_toggle_state("manuallyMode", "autoModeReact", 'checked');
+
+  onToggleClick(event) {
+    counter++;
+    if (counter % 2 == 1) {
+      window.set_toggle_state("manuallyMode", "autoModeReact", 'checked');
+    }
+    else {
+      window.set_toggle_state("manuallyMode", "autoModeReact", 'unchecked');
+    }
   }
-  else{
-    window.set_toggle_state("manuallyMode", "autoModeReact", 'unchecked');
+  render() {
+    return (
+      <div style={styles.block}>
+        <Toggle
+          style={styles.toggle}
+          onClick={this.onToggleClick}
+        />
+      </div>
+    );
   }
-}
-render() {
-  return (
-  <div style={styles.block}>
-    <Toggle 
-      style={styles.toggle}
-      onClick={this.onToggleClick}
-    />
-  </div>
-);
-}
 }

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import RaisedButton from 'material-ui/RaisedButton';
 
 const style = {
-  marginTop: 15,
+  //marginTop: 15,
 };
 
 window.setBttnDownloadEnabled = function setBttnDownloadEnabled() { 

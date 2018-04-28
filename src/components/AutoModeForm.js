@@ -24,7 +24,7 @@ const styles = {
     width: 50,
   },
   opacity: {
-    width: 300,
+    //width: 300,
   },
 };
 // this function is called from main.js

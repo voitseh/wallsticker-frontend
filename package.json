@@ -12,10 +12,10 @@
     "react-tooltip": "^3.4.0"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "PORT=63100 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
-  }
-   
+  },
+  "proxy": "http://93.77.34.47:63100/"
 }

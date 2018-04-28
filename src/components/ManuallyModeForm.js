@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Slider from 'material-ui/Slider';
+import $ from "jquery";
 /**
  * The slider bar can have a set minimum and maximum, and the value can be
  * obtained through the value parameter fired on an onChange event.
@@ -12,21 +13,21 @@ const styles = {
     height: 0,
   },
   slider: {
-    width: 300,
+    //width: 300,
   },
 };
-/*
+
 $("#layer2").mousemove(function (e) {
   // update zoom slider when sticker anchors are dragged
-  if (draggingResizer > -1) {
+  if (window.draggingResizer > -1) {
     SliderZoomControlled.componentWillUpdate();
   }
   // update horizontal and vertical sliders when sticker is dragged
-  if (draggingImage) {
+  if (window.draggingImage) {
     SliderHorizontalControlled.componentWillUpdate();
     SliderVerticalControlled.componentWillUpdate();
   }
-});*/
+});
 
 window.setDefaultManuallyMode = function setDefaultManuallyMode() {
   SliderZoomControlled.setDefaultState();
@@ -53,7 +54,6 @@ class SliderZoomControlled extends Component {
   }
 
   static setDefaultState() {
-    
     this.setState({ zoomSlider: Math.round(window.newScale), });
   }
 
