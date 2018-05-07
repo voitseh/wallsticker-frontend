@@ -11,6 +11,8 @@ var opacity = 1;
 var resultImage = ''
 var resultImageExt;
 
+var currentImageIndex;
+var circleBttnLabel;
 var clickedGalleryImageSrc = ''
 var clickedGalleryImageName = ''
 
@@ -141,9 +143,9 @@ $('body').on('click', 'img', function () {
         sijax_data('wall_mask', [this.getAttribute("name"), this.getAttribute("name").replace('wall', 'mask')]);
         set_wall_or_mask_proportions(image)
         // show caption on wall/mask button click
-        $(".caption").css("display","inline-block");
+        $(".caption").css("display", "inline-block");
     }
-    else if($(this).parent().attr('id') != 'formCanvasResponse') {
+    else if ($(this).parent().attr('id') != 'formCanvasResponse') {
         clear_automode_img()
         sijax_data('sticker', this.getAttribute("name"));
         onStickerLoading()
@@ -342,6 +344,7 @@ draw(true, false);
 //**************INTERFACE************************
 
 ////////////////// Tabs //////////////////////
+/*
 $("#wallspan").click(function () {
     sijax_data('wall_gallery', 'wall_gallery')
 
@@ -349,7 +352,7 @@ $("#wallspan").click(function () {
 $("#stickerspan").click(function () {
     sijax_data('sticker_gallery', 'sticker_gallery')
 });
-
+*/
 // add Wall and Sticker files to gallery
 function addWall() {
     document.getElementById('wallFile').click();
@@ -366,12 +369,13 @@ function addSticker() {
 }
 
 //////////// form submit settings ///////////////
-function loadGalleryWallFile() {  
+function loadGalleryWallFile() {
     var file = document.getElementById('wallFile').files[0];
     var reader = new FileReader();
     reader.readAsDataURL(file);
     reader.addEventListener("load", function () {
         sijax_data('galleryWallFile', reader.result)
+        $("#wallFile")[0].value = '';
     }, false);
 }
 
@@ -381,7 +385,8 @@ function loadGalleryMaskFile() {
     reader.readAsDataURL(file);
     reader.addEventListener("load", function () {
         mask_name = createMaskName();
-        sijax_data('galleryMaskFile', [mask_name, reader.result])
+        sijax_data('galleryMaskFile', [mask_name, reader.result, currentImageIndex, circleBttnLabel])
+        $("#maskFile")[0].value = '';
     }, false);
 }
 
@@ -395,6 +400,7 @@ function loadGalleryStickerFile() {
     reader.readAsDataURL(file);
     reader.addEventListener("load", function () {
         sijax_data('galleryStickerFile', reader.result)
+        $("#stickerFile")[0].value = '';
     }, false);
 
 }
@@ -405,7 +411,8 @@ $(function () {
         e.preventDefault(); //Prevent defaults
 
         var clicked_bttn_id = $(this).attr('id')
-        var currentImageIndex;
+        //var currentImageIndex; 
+
         if ($(this).parent().parent().parent().attr('id') != undefined) {// wall gallery
             currentImageIndex = $(this).parent().parent().parent().attr('id').split('del_wall')[1]
             clickedGalleryImageName = $('#_wall'.concat(currentImageIndex)).attr('name')
@@ -414,43 +421,37 @@ $(function () {
             clickedGalleryImageName = $('#_sticker'.concat(currentImageIndex)).attr('name')
         }
 
-        switch (clicked_bttn_id) {
+        switch (clicked_bttn_id.split('_')[0]) {
 
             case 'delete':
-                onFrameDeleteBttnClick(this, clickedGalleryImageName)
+                onFrameDeleteBttnClick(this, clickedGalleryImageName, clicked_bttn_id)
                 break;
-            case 'change_wall_mask':
+            case 'change':
                 // hide caption on wall/mask button click
-                $(".caption").css("display","none");
+                $(".caption").css("display", "none");
                 onChangeWallMaskBttnClick(this, currentImageIndex)
                 break;
-            /*case 'show_mask':
-               onShowMaskBttnClick(this, currentImageIndex)
-               break;*/
         }
     });
 });
 
-function onFrameDeleteBttnClick(_this, selectedImageMame) {
+function onFrameDeleteBttnClick(_this, selectedImageName, delete_bttn_id) {
     if (window.confirm("Do you really want to delete an image?")) {
+
         imgName = $(_this).parent().parent().parent().parent().find('name');
-        sijax_data('delGalleryImg', selectedImageMame)
+        sijax_data('delGalleryImg', [selectedImageName, delete_bttn_id])
         $(_this).parent().parent().parent().parent().remove();
     }
 }
 
+
 function onChangeWallMaskBttnClick(_this, currentImageIndex) {
+    circleBttnLabel = $(_this).text()
     clickedGalleryImageSrc = $('#_wall'.concat(currentImageIndex)).attr('src')
     $('#_wall'.concat(currentImageIndex)).attr('src', $(_this).parent().parent().parent().attr('src'))
     $(_this).parent().parent().parent().attr('src', clickedGalleryImageSrc)
 }
-/*
-function onShowMaskBttnClick(_this, currentImageIndex){
-    clickedGalleryImageSrc = $(_this).parent().parent().parent().attr('src')
-    $(_this).parent().parent().parent().attr('src',  $('#_img'.concat(currentImageIndex)).attr('src'))
-    $('#_img'.concat(currentImageIndex)).attr('src', clickedGalleryImageSrc)
-    
-}*/
+
 
 ///////////// auto mode settings ////////////////
 // auto mode form onChange
@@ -493,7 +494,7 @@ function check_image_items_cmpleted() {
 }
 
 //********************** handle Wall, Mask or Sticker button click event ***************
-function readURL(input, type) { 
+function readURL(input, type) {
     clear_automode_img()
 
     if (input.files && input.files[0]) {
@@ -504,17 +505,17 @@ function readURL(input, type) {
             switch (type) {
                 case "image":
                     image.src = result;
-                    sijax_data('Wall', [input.files[0]['name'],result])
+                    sijax_data('custom_wall', [input.files[0]['name'], result])
                     $("#imageInput")[0].value = '';
                     break;
                 case "mask":
                     mask.src = result;
-                    sijax_data('Mask', [input.files[0]['name'],result])
+                    sijax_data('custom_mask', [input.files[0]['name'], result])
                     $("maskInput")[0].value = '';
                     break;
                 case "sticker":
                     sticker.src = result;
-                    sijax_data('Sticker', [input.files[0]['name'],result])
+                    sijax_data('custom_sticker', [input.files[0]['name'], result])
                     $("#stickerInput")[0].value = '';
                     break;
             }
@@ -524,7 +525,7 @@ function readURL(input, type) {
                 onStickerLoading()
             }
 
-           set_button_download_state();
+            set_button_download_state();
         }
 
         reader.readAsDataURL(input.files[0]);
@@ -533,7 +534,7 @@ function readURL(input, type) {
 
 $("#imageInput").change(function () {
     readURL(this, "image");
-    });
+});
 
 $("#maskInput").change(function () {
     readURL(this, "mask");
@@ -720,13 +721,16 @@ window.onload = function () {// default settings mode
     BORDER_WIDTH = get_border_props()['borderWidth'];
     BORDER_HEIGHT = get_border_props()['borderHeight'];
     borderProportion = get_border_props()['borderProportion'];
-
     WIDTH = BORDER_WIDTH
     HEIGHT = BORDER_HEIGHT
     previousWidth = WIDTH
     previousHeight = HEIGHT
 
     set_toggle_state("manuallyMode", "autoModeReact", 'unchecked');
+
+
+    sijax_data('sticker_gallery', 'sticker_gallery')
+    sijax_data('wall_gallery', 'wall_gallery')
 }
 
 //****************** DOWNLOAD AND APPLY IMAGES *****************
@@ -760,11 +764,11 @@ function onDownload() {
         download(resultImage, title)
         setPercent(100);
     } resultImage = ''
-    set_default_values();
-    clearLargeImg();
+    //set_default_values();
+    //clearLargeImg();
 
     setTimeout(setPercent, 800, 0);
-    setBttnDownloadDisabled()
+    //setBttnDownloadDisabled()
 }
 
 function set_automode_img_attrs() {
@@ -790,10 +794,10 @@ function clearLargeImg() {
     mask.src = '';
     sticker.src = '';
     clearCanvas();
-   clear_automode_img()
+    clear_automode_img()
 }
 
-function clear_automode_img(){
+function clear_automode_img() {
     if ($('#theImg') != undefined) {
         $('#theImg').remove();
     }

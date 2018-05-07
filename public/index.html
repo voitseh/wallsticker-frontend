@@ -19,61 +19,57 @@
 
   <table style="width: 80%" , align="center">
 
-    <tr style="position:relative; width:100%">
+    <tr style="position:relative; width:100%; ">
       <td colspan="2" bgcolor='#e7e8da'>
         <center>
-          <img src="%PUBLIC_URL%/logo.png" style="height: 50px">
+          <img src="%PUBLIC_URL%/logo.png" style="height: 50px; margin-top: 10px">
         </center>
       </td>
     </tr>
 
-    <tr style="position:relative; width:90%; float:left">
-      <!--td style="position: relative; float: left; "-->
-        <td style="position: relative; float: left;">
-          <div style="position:relative; width:100%; "  id="buttonAddWall"></div>
-        </td>
-        <td style="position: relative;display: inline-block;" , align="center">
-          <div style="position:relative; width:100%; " id="buttonAddMask"></div>
-        </td>
-        <td style="position: relative;float: right;">
-          <div style="position:relative; width:100%; " id="buttonAddSticker"></div>
-        </td>
-      <!--/td-->
+    <tr style="position:relative; width:90%; top: 70px; float:left">
+      <td style="position: relative; float: left;">
+        <div style="position:relative; width:100%; " id="buttonAddWall"></div>
+      </td>
+      <td style="position: relative;display: inline-block;" , align="center">
+        <div style="position:relative; width:100%; " id="buttonAddMask"></div>
+      </td>
+      <td style="position: relative;float: right;">
+        <div style="position:relative; width:100%; " id="buttonAddSticker"></div>
+      </td>
     </tr>
     <tr>
 
-      <td  style=" position: relative; margin:20px; width:50%">
+      <td style=" position: relative; margin:20px; width:50%;">
 
         <section>
-          <!--div id="paper" style="z-index: -1; position:relative; width:90%; float:left;"></div-->
-           <!-- buttons 'Wall' 'Mask' and 'Sticker' -->
-           <input type="file" id="imageInput" style="display: none;" accept=".jpg, .jpeg, .png"/>
-           <input type="file" id="maskInput" style="display: none;" accept=".jpg, .jpeg, .png"/>
-           <input type="file" id="stickerInput" style="display: none;" accept=".jpg, .jpeg, .png"/>
+          <!-- buttons 'Wall' 'Mask' and 'Sticker' -->
+          <input type="file" id="imageInput" style="display: none;" accept=".jpg, .jpeg, .png" />
+          <input type="file" id="maskInput" style="display: none;" accept=".jpg, .jpeg, .png" />
+          <input type="file" id="stickerInput" style="display: none;" accept=".jpg, .jpeg, .png" />
 
-           <!-- canvas -->
-          <div id="canvasesdiv" style="position:relative; float:left; top:-35px; border: 1px solid rgb(204, 204, 204); width:90%; height:300px">
+          <!-- canvas -->
+          <div id="canvasesdiv" style="position:relative; float:left; top:0px; border: 1px solid rgb(204, 204, 204); width:90%; height:300px">
             <canvas id="layer1" style="z-index: 1;position:absolute;left:0px;top:0px">
               This text is displayed if your browser does not support HTML5 Canvas.
             </canvas>
             <canvas id="layer2" style="z-index: 2;position:absolute;left:0px;top:0px">
               This text is displayed if your browser does not support HTML5 Canvas.
             </canvas>
-            <div id="formCanvasResponse" style="z-index: 2;" ></div>
+            <div id="formCanvasResponse" style="z-index: 2;"></div>
           </div>
-        </section> 
+        </section>
       </td>
-      <td style=" position: relative;float: right; margin-top:20px; width: 100%">
+      <td style=" position: relative;float: right; margin-top:90px; width: 100%">
         <!-- tabs -->
-        <div id="raz" style="float:right; width:90%">
-
-                    
-           <div>
+        <div id="raz" style="float:right; width:90%; ">
+          <div>
             <span id="wallspan" style="color:rgb(207, 205, 205)"></span>
             <!-- button '+' -->
             <input type="file" onchange="loadGalleryWallFile()" name="wallFile" id="wallFile" style="display: none;" accept=".jpg, .jpeg, .png"
             />
-            <input type="file" onchange="loadGalleryMaskFile()" name="maskFile" id="maskFile" style="display: none;" accept=".jpg, .jpeg, .png"/>
+            <input type="file" onchange="loadGalleryMaskFile()" name="maskFile" id="maskFile" style="display: none;" accept=".jpg, .jpeg, .png"
+            />
             <div style=" top:0px; left:0px; position:absolute; overflow-y:scroll ; border: 1px solid rgb(204, 204, 204);  border-top-style:hidden; width:100%; height:320px">
               <ul id="wall_gallery"></ul>
             </div>
@@ -90,7 +86,6 @@
           <div>
             <span id="settingsspan" style="color:rgb(204, 204, 204)">Settings</span>
             <div>
-              <!--form id="autoMode"  enctype="multipart/form-data"-->
               <!-- auto -->
               <div id="autoModeReact" style=" position: relative; width: 90%"></div>
               <!--/form-->
@@ -108,16 +103,16 @@
     <tr>
       <td colspan="3">
         <!-- linear progress -->
-        <div style="position: relative; width:99%; top:225px" id="linearProgress"></div>
+        <div style="position: relative; width:99%; top:250px" id="linearProgress"></div>
       </td>
     </tr>
 
     <tr>
       <!-- button download -->
-      <td style="position: relative; top:-15px">
+      <td style="position: relative; top:0px">
         <div style="position:relative; float: left;" id="buttonDownload"></div>
       </td>
-      <td style="position: relative; top:-40px">
+      <td style="position: relative; top:-25px">
         <h2 style="color: rgb(204, 204, 204); position:relative; float: left; right: 10%;">
           <div style="position:relative;float: right;" id="toggle"></div>
           Auto

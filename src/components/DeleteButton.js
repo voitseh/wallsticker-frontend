@@ -16,7 +16,7 @@ const styles = {
 
 const DeleteBttn = () => (  
   <div style={{position:'relative', float:'left', marginLeft:'-41px'}}>
-    <IconButton id = 'delete' tooltip="delete" tooltipPosition="bottom-left" iconStyle={styles.smallIcon}
+    <IconButton id = 'delete_sticker' tooltip="delete" tooltipPosition="bottom-left" iconStyle={styles.smallIcon}
         style={styles.small}>
       <ActionGrade />
     </IconButton>

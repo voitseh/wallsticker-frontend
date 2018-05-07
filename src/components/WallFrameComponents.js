@@ -20,9 +20,9 @@ const styles = {
 
 class LoadMaskButton extends Component {
   constructor(props) {
-    super(props)
+    super(props);
   }
-
+  
   render() {
     return (
       <div style={{ position: 'relative', float: 'left', bottom: '180px' }}>
@@ -45,7 +45,7 @@ class DeleteButton extends Component {
     return (
       <div style={{ position: 'relative', float: 'right', left: '-3%', bottom: '180px' }}>
         <IconButton tooltip="delete" tooltipPosition="bottom-left" iconStyle={styles.smallIcon}
-          style={styles.small} id="delete">
+          style={styles.small} id="delete_wall_mask">
           <DeleteBttn />
         </IconButton>
       </div>
@@ -57,13 +57,25 @@ class DeleteButton extends Component {
 class Change_Wall_Mask extends Component {
   constructor(props) {
     super(props)
+    this.state = {
+      label: 'show mask',
+    };
+    this.change_tooltip_text = this.change_tooltip_text.bind(this);
+  }
+
+  change_tooltip_text(event) { 
+    if(this.state.label == 'show mask'){
+      this.setState({ label: 'show wall' })
+    }else{
+      this.setState({ label: 'show mask' })
+    }
   }
 
   render() {
     return (
       <div style={{ position: 'relative', float: 'right', left: '10%', bottom: '45px' }}>
-        <IconButton tooltip="change wall / mask" tooltipPosition="bottom-left" id="show_mask" iconStyle={styles.smallIcon}
-          style={styles.small} id="change_wall_mask">
+        <IconButton tooltip={this.state.label} tooltipPosition="bottom-left" iconStyle={styles.smallIcon}
+          style={styles.small} id="change_wall_mask" onClick={this.change_tooltip_text}>
           <ShowWallOrMaskBttn />
         </IconButton>
       </div>
