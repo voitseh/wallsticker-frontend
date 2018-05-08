@@ -83,7 +83,9 @@ window.onresize = function () {
     if (sticker.src.includes('data')) {
         onStickerLoading()
     }
-    set_automode_result_img_style()
+    if (document.getElementById('theImg') != null){
+        set_automode_result_img_style()
+    }
 }
 
 function set_automode_result_img_style() {
@@ -511,7 +513,7 @@ function readURL(input, type) {
                 case "mask":
                     mask.src = result;
                     sijax_data('custom_mask', [input.files[0]['name'], result])
-                    $("maskInput")[0].value = '';
+                    $("#maskInput")[0].value = '';
                     break;
                 case "sticker":
                     sticker.src = result;

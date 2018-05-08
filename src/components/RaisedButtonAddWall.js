@@ -7,9 +7,16 @@ const style = {
   marginBottom: 10
 };
 
+//export default class RaisedButtonAddWall extends Component {
+
 export default class RaisedButtonAddWall extends Component {
+
+  constructor(props) {
+    super(props);
+    this.onWallImgClick = this.onWallImgClick.bind(this);
+  }  
   
-  onWallImgClick(event) {
+  onWallImgClick(event) { 
     document.getElementById('imageInput').click()
   }
 
