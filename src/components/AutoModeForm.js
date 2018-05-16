@@ -28,12 +28,13 @@ const styles = {
   },
 };
 // this function is called from main.js
-window.setDefaultAutoMode = function setDefaultAutoMode() {
+window.setDefaultAutoMode = function setDefaultAutoMode() { 
   CheckboxStickerCenter.setDefaultState();
-  TextFieldX.setDefaultState();
+  TextFieldX.setDefaultState(); 
   TextFieldY.setDefaultState();
   SliderOpacity.setDefaultState();
 }
+
 
 class CheckboxStickerCenter extends Component {
   constructor(props) {
@@ -45,18 +46,17 @@ class CheckboxStickerCenter extends Component {
     CheckboxStickerCenter.setDefaultState = CheckboxStickerCenter.setDefaultState.bind(this);
   }
   static setDefaultState() {
-
-    this.setState({ checked: false, });
+    this.setState({ checked: false});
   }
 
   updateCheck() {
     this.setState((oldState) => {
       return {
         checked: !oldState.checked
-
       };
     });
-    window.stickerCenterState(!this.state.checked);
+    //window.stickerCenterState(!this.state.checked);
+    window.onAutomodeSttsChange(true);
   }
   render() {
     return (
@@ -66,6 +66,8 @@ class CheckboxStickerCenter extends Component {
           checked={this.state.checked}
           onCheck={this.updateCheck.bind(this)}
           style={styles.checkbox}
+          id = "sticker_center"
+          value = {this.state.checked}
           name="sticker_center"
         />
       </div>
@@ -86,8 +88,10 @@ class TextFieldX extends Component {
 
   static getValueX() {
     TextFieldY.setDefaultState();
-    window.repeat_xState(this.refs.tile_x.getValue());
-    return this.refs.tile_x.getValue();
+    defaultValue: this.refs.tile_x.getValue()
+    //window.repeat_xState(this.refs.tile_x.getValue());
+    //return this.refs.tile_x.getValue();
+    window.onAutomodeSttsChange();
   };
 
   render() {
@@ -104,6 +108,7 @@ class TextFieldX extends Component {
           type="number"
           name="repeat_x"
           onChange={TextFieldX.getValueX}
+          id ="repeat_x"
         />
       </div>
     );
@@ -124,8 +129,10 @@ class TextFieldY extends Component {
 
   static getValueY() {
     TextFieldX.setDefaultState();
-    window.repeat_yState(this.refs.tile_y.getValue());
-    return this.refs.tile_y.getValue();
+    defaultValue: this.refs.tile_y.getValue()
+    //window.repeat_yState(this.refs.tile_y.getValue());
+    //return this.refs.tile_y.getValue();
+    window.onAutomodeSttsChange();
   };
 
   render() {
@@ -140,6 +147,7 @@ class TextFieldY extends Component {
           defaultValue="1"
           type="number"
           name="repeat_y"
+          id="repeat_y"
           onChange={TextFieldY.getValueY}
         />
       </div>
@@ -158,15 +166,14 @@ class SliderOpacity extends Component {
     SliderOpacity.setDefaultState = SliderOpacity.setDefaultState.bind(this);
   }
   static setDefaultState() {
-
     this.setState({ opacitySlider: 1, });
-
   }
 
   handleOpacitySlider(event, value) {
     // submit form when slider dragging
     this.setState({ opacitySlider: value });
-    window.opacityState(this.state.opacitySlider)
+    //window.opacityState(this.state.opacitySlider)
+    window.onAutomodeSttsChange();
   }
 
   render() {
@@ -182,6 +189,7 @@ class SliderOpacity extends Component {
           value={this.state.opacitySlider}
           onChange={this.handleOpacitySlider}
           name="opacity"
+          id = 'opacity_auto'
         />
       </div>
     );

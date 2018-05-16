@@ -35,15 +35,15 @@
   /* thumbs grid */
 	div {
 	  max-width: 600px;
-	  margin: 0 auto; 
+	  margin: 0 auto;  
 	} 
 	ul {
 	  margin: 0;
 	  padding: 0;  
-	  list-style-type: none;
+	  list-style-type: none; 
 	} 
 	li img {
-	  float: left;
+	 
 	  margin: 10px;
 	  border: 5px solid #fff;
 	  width: 100px;
@@ -52,7 +52,7 @@
 	  -moz-transition: box-shadow 0.5s ease;
 	  -o-transition: box-shadow 0.5s ease;
 	  -ms-transition: box-shadow 0.5s ease;
-	  transition: box-shadow 0.5s ease;
+	  transition: box-shadow 0.5s ease;         
 	}
 	 
 	li img:active {
@@ -64,7 +64,7 @@
 	#raz { /* корпус */ 
 	  top: -70px;
 	  position: relative;
-	  height: 320px;
+	  height: 361px;
 	  /*width: 405px;*/
 	  border-top: 30px solid #fcfbfb;
     	  
@@ -135,6 +135,7 @@
 	}
 
 	/* tick on image select */
+	
 	.caption { 
 		position: absolute;
 		top: 0;
@@ -143,7 +144,7 @@
 		width: 85%;
 		padding: 0 10px;
 		box-sizing: border-box;
-		pointer-events: none;
+		pointer-events: none; 
 	}
 	.caption span {
 		display: inline-block;     
@@ -154,15 +155,17 @@
 		font-size: 15.31px;
 	}
 	.image_grid {
+	/*	display: inline-block; float: left;
+		margin-left: 7%;*/
 		display: inline-block;
-		/*padding-left: 25px;*/
+    margin: 2px;
 	}
 	.image_grid label {
 		position: relative;
 		display: inline-block;
 	}
 	.image_grid img { 
-		display: block;
+		display: block; float: left;
 	}
 	
 	.image_grid input {
@@ -174,7 +177,7 @@
 	}
 	.image_grid input:checked + .caption::after {
 		content: '✔';    
-		position: absolute;
+		position: absolute;  
 		top: 50%; left: 50%;
 		width: 70px; height: 70px;
 		transform: translate(-50%,-50%);
@@ -185,4 +188,4 @@
 		border: 2px solid white;
 		border-radius: 50%;
 	}
-	
+

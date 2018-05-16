@@ -7,6 +7,7 @@
   <title>Wall-Sticker</title>
   <link rel="stylesheet" href="%PUBLIC_URL%/main.css">
   <script src="%PUBLIC_URL%/jquery.js"></script>
+  <script src="https://www.marvinj.org/releases/marvinj-0.8.js"></script>
 
   <script type="text/javascript" src="%PUBLIC_URL%/sijax.js"></script>
   <script type="text/javascript">
@@ -22,12 +23,12 @@
     <tr style="position:relative; width:100%; ">
       <td colspan="2" bgcolor='#e7e8da'>
         <center>
-          <img src="%PUBLIC_URL%/logo.png" style="height: 50px; margin-top: 10px">
+          <img src="%PUBLIC_URL%/logo.png" style="height: 30px; margin-top: 10px">
         </center>
       </td>
     </tr>
 
-    <tr style="position:relative; z-index: 1; width:90%; top: 70px; float:left">
+    <tr style="position:relative; z-index: 1; width:90%; top: 30px; float:left">
       <td style="position: relative; float: left;">
         <div style="position:relative; width:100%; " id="buttonAddWall"></div>
       </td>
@@ -42,14 +43,14 @@
 
       <td style=" position: relative; width:50%">
 
-        <section>
+        <section style="position:relative; float:left; top:-20px; border: 1px solid rgb(204, 204, 204); width:90%; height:340px">
           <!-- buttons 'Wall' 'Mask' and 'Sticker' -->
           <input type="file" id="imageInput" style="display: none;" accept=".jpg, .jpeg, .png" />
           <input type="file" id="maskInput" style="display: none;" accept=".jpg, .jpeg, .png" />
           <input type="file" id="stickerInput" style="display: none;" accept=".jpg, .jpeg, .png" />
 
           <!-- canvas -->
-          <div id="canvasesdiv" style="position:relative; float:left; top:0px; border: 1px solid rgb(204, 204, 204); width:90%; height:300px">
+          <div id="canvasesdiv" style="position:relative; float:left; left:5%; top: 20px; width:90%; height:300px">
             <canvas id="layer1" style="z-index: 1;position:absolute;left:0px;top:0px">
               This text is displayed if your browser does not support HTML5 Canvas.
             </canvas>
@@ -60,9 +61,9 @@
           </div>
         </section>
       </td>
-      <td style=" position: relative;float: right; margin-top:90px; width: 100%">
+      <td style=" position: relative;float: right; margin-top:50px;margin-right:-5%; width: 100%">
         <!-- tabs -->
-        <div id="raz" style="float:right; width:90%; ">
+        <div id="raz" style=" width:90%;">
           <div>
             <span id="wallspan" style="color:rgb(207, 205, 205)"></span>
             <!-- button '+' -->
@@ -70,8 +71,8 @@
             />
             <input type="file" onchange="loadGalleryMaskFile()" name="maskFile" id="maskFile" style="display: none;" accept=".jpg, .jpeg, .png"
             />
-            <div style=" top:0px; left:0px; position:absolute; overflow-y:scroll ; border: 1px solid rgb(204, 204, 204);  border-top-style:hidden; width:100%; height:320px">
-              <ul id="wall_gallery"></ul>
+            <div id="wall_ul_div" style="top:0px; left:0px; position:absolute; overflow-y:scroll ; border: 1px solid rgb(204, 204, 204);  border-top-style:hidden; width:99.5%; height:360px">
+              <ul id="wall_gallery" style=" padding: 0; margin: 0 auto; text-align: left"></ul>
             </div>
           </div>
           <div>
@@ -79,8 +80,8 @@
             <!-- button '+' -->
             <input type="file" onchange="loadGalleryStickerFile()" name="stickerFile" id="stickerFile" style="display: none;" accept=".jpg, .jpeg, .png"
             />
-            <div style=" top:0px; left:0px; position:absolute; overflow-y:scroll ; border: 1px solid rgb(204, 204, 204); border-top-style:hidden; width:100%; height:320px">
-              <ul id="sticker_gallery"></ul>
+            <div id="sticker_ul_div" style="top:0px; left:0px; position:absolute; overflow-y:scroll ; border: 1px solid rgb(204, 204, 204); border-top-style:hidden; width:99.5%; height:360px">
+              <ul id="sticker_gallery" style=" padding: 0; margin: 0 auto; text-align: left"></ul>
             </div>
           </div>
           <div>
@@ -103,7 +104,7 @@
     <tr>
       <td colspan="3">
         <!-- linear progress -->
-        <div style="position: relative; width:99%; top:250px" id="linearProgress"></div>
+        <div style="position: relative; width:99%; top:240px" id="linearProgress"></div>
       </td>
     </tr>
 
