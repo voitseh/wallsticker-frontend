@@ -55,7 +55,6 @@ class CheckboxStickerCenter extends Component {
         checked: !oldState.checked
       };
     });
-    //window.stickerCenterState(!this.state.checked);
     window.onAutomodeSttsChange(true);
   }
   render() {
@@ -89,8 +88,6 @@ class TextFieldX extends Component {
   static getValueX() {
     TextFieldY.setDefaultState();
     defaultValue: this.refs.tile_x.getValue()
-    //window.repeat_xState(this.refs.tile_x.getValue());
-    //return this.refs.tile_x.getValue();
     window.onAutomodeSttsChange();
   };
 
@@ -124,14 +121,11 @@ class TextFieldY extends Component {
 
   static setDefaultState() {
     this.refs.tile_y.getInputNode().value = '1';
-
   }
 
   static getValueY() {
     TextFieldX.setDefaultState();
     defaultValue: this.refs.tile_y.getValue()
-    //window.repeat_yState(this.refs.tile_y.getValue());
-    //return this.refs.tile_y.getValue();
     window.onAutomodeSttsChange();
   };
 
@@ -172,7 +166,6 @@ class SliderOpacity extends Component {
   handleOpacitySlider(event, value) {
     // submit form when slider dragging
     this.setState({ opacitySlider: value });
-    //window.opacityState(this.state.opacitySlider)
     window.onAutomodeSttsChange();
   }
 

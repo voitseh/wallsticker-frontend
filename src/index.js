@@ -24,14 +24,14 @@ const muiTheme = getMuiTheme({
   },
 });
 
-function addWallComponents(event) {
+function addWallComponents(event) { 
   if(event.target.tagName == 'LI'){
     ReactDOM.render(<MuiThemeProvider><WallComponents /></MuiThemeProvider>, document.getElementById(event.target.lastChild.lastChild.lastChild.id));
   }
 };
 
 function addDelBttns(event) {
-  if(event.target.tagName == 'LI'){
+  if(event.target.tagName == 'LI'){   
     ReactDOM.render(<MuiThemeProvider><DeleteBttn /></MuiThemeProvider>, document.getElementById(event.target.lastChild.lastChild.lastChild.id));
   }
 };
